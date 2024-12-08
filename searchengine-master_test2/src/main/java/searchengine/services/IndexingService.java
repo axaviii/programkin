@@ -50,27 +50,27 @@ public class IndexingService {
                     break;
                 }
                 logger.info("Начало индексации сайта: {}", siteUrl.getUrl());
-                try {
-                    Site existSite = siteRepository.findByUrl(siteUrl.getUrl());
-                    if (existSite != null) {
-                        logger.info("Удаление существующего сайта: {}", existSite.getUrl());
-                        pageRepository.deleteBySite(existSite);
-                        siteRepository.deleteById(existSite.getId());
+
+                    SiteEntity existSiteEntity = siteRepository.findByUrl(siteUrl.getUrl());
+                    if (existSiteEntity != null) {
+                        logger.info("Удаление существующего сайта: {}", existSiteEntity.getUrl());
+                        pageRepository.deleteBySiteEntity(existSiteEntity);
+                        siteRepository.deleteById(existSiteEntity.getId());
                     }
                     //Создаем новую запись для сайта со статусом Indexing
-                    Site site = new Site();
-                    site.setUrl(siteUrl.getUrl());
-                    site.setName(siteUrl.getName());
-                    site.setStatus(Status.INDEXING);
-                    site.setStatusTime(new Date());
+                    SiteEntity siteEntity = new SiteEntity();
+                    siteEntity.setUrl(siteUrl.getUrl());
+                    siteEntity.setName(siteUrl.getName());
+                    siteEntity.setStatus(Status.INDEXING);
+                    siteEntity.setStatusTime(new Date());
                     logger.info("Создание новой записи для сайта: {}", siteUrl.getUrl());
-                    siteRepository.save(site);
-                    logger.info("Сохраненный сайт: ID={}, URL={}", site.getId(), site.getUrl());
+                    siteRepository.save(siteEntity);
+                    logger.info("Сохраненный сайт: ID={}, URL={}", siteEntity.getId(), siteEntity.getUrl());
 
 
                     //Запускаем индексацию сайта
                     SiteMap siteMap = new SiteMap(siteUrl.getUrl());
-                    SiteMapRecursiveAction task = new SiteMapRecursiveAction(siteMap, site,
+                    SiteMapRecursiveAction task = new SiteMapRecursiveAction(siteMap, siteEntity,
                             this, pageRepository, siteRepository, lemmaAndIndexService,
                             stopRequested);
                     logger.info("Запуск индексации для сайта: {}", siteUrl.getUrl());
@@ -79,14 +79,10 @@ public class IndexingService {
 
                     if (!stopRequested.get()) {
                         //Обновляем статус на Indexed после завершения индексации
-                       updateSiteStatus(site, Status.INDEXED, null);
+                       updateSiteStatus(siteEntity, Status.INDEXED, null);
                     }else {
-                        updateSiteStatus(site, Status.FAILED,"Индексация остановлена пользователем");
+                        updateSiteStatus(siteEntity, Status.FAILED,"Индексация остановлена пользователем");
                     }
-
-                } catch (Exception e) {
-                    handleSiteIndexingFailure(siteUrl, e);
-                }
             }
         } finally {
             stopRequested.set(false);
@@ -96,23 +92,23 @@ public class IndexingService {
         }
     }
 
-    private void updateSiteStatus(Site site, Status status, String errorText) {
-        site.setStatus(status);
-        site.setStatusTime(new Date());
-        site.setLastErrorText(errorText);
-        siteRepository.save(site);
+    private void updateSiteStatus(SiteEntity siteEntity, Status status, String errorText) {
+        siteEntity.setStatus(status);
+        siteEntity.setStatusTime(new Date());
+        siteEntity.setLastErrorText(errorText);
+        siteRepository.save(siteEntity);
     }
 
     private void handleSiteIndexingFailure(searchengine.config.Site siteUrl, Exception e) {
         logger.error("Ошибка при индексации сайта: {} ", siteUrl.getUrl(), e);
         // если произошла ошибка меняем статус на Failed и сохраняем ошибку
 
-        Site faildSite = siteRepository.findByUrl(siteUrl.getUrl());
-        if (faildSite != null) {
-            faildSite.setStatus(Status.FAILED);
-            faildSite.setStatusTime(new Date());
-            faildSite.setLastErrorText(e.getMessage());
-            siteRepository.save(faildSite);
+        SiteEntity faildSiteEntity = siteRepository.findByUrl(siteUrl.getUrl());
+        if (faildSiteEntity != null) {
+            faildSiteEntity.setStatus(Status.FAILED);
+            faildSiteEntity.setStatusTime(new Date());
+            faildSiteEntity.setLastErrorText(e.getMessage());
+            siteRepository.save(faildSiteEntity);
         }
     }
 
@@ -128,12 +124,12 @@ public class IndexingService {
     }
 
     private void updateFailedSites() {
-        List<Site> indexingSites = siteRepository.findAllByStatus(Status.INDEXED);
-        for (Site site : indexingSites) {
-            site.setStatus(Status.FAILED);
-            site.setStatusTime(new Date());
-            site.setLastErrorText("Индексация остановлена пользователем");
-            siteRepository.save(site);
+        List<SiteEntity> indexingSitesEntities = siteRepository.findAllByStatus(Status.INDEXED);
+        for (SiteEntity siteEntity : indexingSitesEntities) {
+            siteEntity.setStatus(Status.FAILED);
+            siteEntity.setStatusTime(new Date());
+            siteEntity.setLastErrorText("Индексация остановлена пользователем");
+            siteRepository.save(siteEntity);
         }
     }
 }

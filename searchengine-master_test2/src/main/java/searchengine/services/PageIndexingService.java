@@ -7,7 +7,7 @@ import searchengine.config.SitesList;
 import searchengine.model.Index;
 import searchengine.model.Lemma;
 import searchengine.model.Page;
-import searchengine.model.Site;
+import searchengine.model.SiteEntity;
 import searchengine.repository.IndexRepository;
 import searchengine.repository.LemmaRepository;
 import searchengine.repository.PageRepository;
@@ -48,13 +48,13 @@ public class PageIndexingService {
         }
         try {
             //находим сайт к которому относится Url
-            Site site = siteRepository.findByUrl(getSiteBaseUrl(url));
+            SiteEntity site = siteRepository.findByUrl(getSiteBaseUrl(url));
             if (site == null) {
                 throw new IllegalStateException(" Сайт для url не найден в базе данных");
             }
             // Удаляем старую запись, если страница уже существует
 
-            Page existingPage = pageRepository.findByPathAndSite(url, site).orElse(null);
+            Page existingPage = pageRepository.findByPathAndSiteEntity(url, site).orElse(null);
             if (existingPage != null) {
                 deleteExistingPageData(existingPage);
                 logger.info("Старая запись для страницы {} удалена",url);
@@ -65,7 +65,7 @@ public class PageIndexingService {
 
             // Создаем и сохраняем новую страницу
             Page page = new Page();
-            page.setSite(site);
+            page.setSiteEntity(site);
             page.setPath(url);
             page.setCode(httpCode);
             page.setContent(content);
@@ -110,7 +110,7 @@ public class PageIndexingService {
             int lemmaFrequencyOnPage = entry.getValue();
 
             // Ищем существующую лемму или создаем новую
-            Lemma lemma = lemmaRepository.findByLemmaAndSite(lemmatext, page.getSite()).orElseGet(()->{
+            Lemma lemma = lemmaRepository.findByLemmaAndSiteEntityId(lemmatext, page.getSiteEntity().getId()).orElseGet(()->{
                 Lemma newLemma = new Lemma();
                 newLemma.setLemma(lemmatext);
                 newLemma.setFrequency(0);

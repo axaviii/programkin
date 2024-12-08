@@ -12,6 +12,7 @@ import searchengine.repository.IndexRepository;
 import searchengine.repository.LemmaRepository;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class LemmaAndIndexService {
@@ -47,30 +48,30 @@ public class LemmaAndIndexService {
 
     @Transactional
     public void saveLemma(String lemmaText, Integer frequency, Page page) {
-        Lemma lemma = lemmaRepository.findByLemmaAndSite(lemmaText, page.getSite()).orElseGet(() -> {
-            try {
-                Lemma newlemma = new Lemma();
-                newlemma.setLemma(lemmaText);
-                newlemma.setFrequency(0);
-                newlemma.setSite(page.getSite());
-                return lemmaRepository.saveAndFlush(newlemma);
-            } catch (Exception e) {
-                logger.error("Ошибка при сохранении новой леммы: {}", lemmaText, e);
-                throw new RuntimeException("Ошибка при сохранении леммы", e);
-            }
-        });
-
-        //увеличиваем частоту и обновляем лемму
-        lemma.setFrequency(lemma.getFrequency() + frequency);
-        lemmaRepository.saveAndFlush(lemma);
-        // создаем или обновляем индекс
-        createIndex(page, lemma, frequency);
+//        Site managedSite = page.getSite();
+//        if (!managedSite.isManaged()) {
+//            managedSite = siteRepository.findById(managedSite.getId())
+//                    .orElseThrow(() -> new RuntimeException("Сайт не найден"));
+        Optional<Lemma> lemmaOptional = lemmaRepository.findByLemmaAndSiteEntityId(lemmaText, page.getSiteEntity().getId());
+        if (lemmaOptional.isEmpty()) {
+            Lemma newlemma = new Lemma();
+            newlemma.setLemma(lemmaText);
+            newlemma.setFrequency(0);
+            newlemma.setSiteEntity(page.getSiteEntity());
+            lemmaRepository.saveAndFlush(newlemma);
+        } else {
+            Lemma lemma = lemmaOptional.get();
+            //увеличиваем частоту и обновляем лемму
+            lemma.setFrequency(lemma.getFrequency() + frequency);
+            lemmaRepository.saveAndFlush(lemma);
+            // создаем или обновляем индекс
+            createIndex(page, lemma, frequency);
+        }
     }
-
 
     private void createIndex(Page page, Lemma lemma, Integer count) {
         Index index = indexRepository
-                .findByPageAndLemma(page, lemma)
+                .findByPageIdAndLemmaId(page.getId(), lemma.getId())
                 .orElseGet(() -> {
                     // создаем запись в таблице index
                     Index newindex = new Index();

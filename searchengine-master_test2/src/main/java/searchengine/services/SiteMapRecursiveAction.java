@@ -3,7 +3,7 @@ package searchengine.services;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import searchengine.model.Page;
-import searchengine.model.Site;
+import searchengine.model.SiteEntity;
 import searchengine.model.Status;
 import searchengine.repository.PageRepository;
 import searchengine.repository.SiteRepository;
@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SiteMapRecursiveAction extends RecursiveAction {
     private final SiteMap siteMap;
-    private final Site site;
+    private final SiteEntity siteEntity;
     private final IndexingService indexingService;
     private final PageRepository pageRepository;
     private final SiteRepository siteRepository;
@@ -26,18 +26,17 @@ public class SiteMapRecursiveAction extends RecursiveAction {
     private static final Logger logger = LoggerFactory.getLogger(SiteMapRecursiveAction.class);
     private final AtomicBoolean stopRequested;
 
-    public SiteMapRecursiveAction(SiteMap siteMap, Site site,IndexingService indexingService,
+    public SiteMapRecursiveAction(SiteMap siteMap, SiteEntity site, IndexingService indexingService,
                                   PageRepository pageRepository, SiteRepository siteRepository,
                                   LemmaAndIndexService lemmaAndIndexService, AtomicBoolean stopRequested) {
         this.siteMap = siteMap;
-        this.site = site;
+        this.siteEntity = site;
         this.indexingService = indexingService;
         this.pageRepository = pageRepository;
         this.siteRepository = siteRepository;
         this.lemmaAndIndexService = lemmaAndIndexService;
         this.stopRequested = stopRequested;
     }
-
 
     @Override
     protected void compute() {
@@ -59,7 +58,7 @@ public class SiteMapRecursiveAction extends RecursiveAction {
                 linksPool.add(link);
 
                 // получаем HTTP код и контент страницы
-                try {
+
                     int code = ParseHtml.getHttpCode(link);
                     String content = ParseHtml.getContent(link);
 
@@ -67,29 +66,27 @@ public class SiteMapRecursiveAction extends RecursiveAction {
                         throw new IllegalStateException("Содержимое страницы пустое: " + url);
                     }
                     Page indexingPage = new Page();
-                    indexingPage.setSite(site);
+                    indexingPage.setSiteEntity(siteEntity);
                     indexingPage.setPath(link);
                     indexingPage.setCode(code);
                     indexingPage.setContent(content);
 
-//                    Site sitePage = siteRepository.findById(site.getId()).orElseThrow();
-//                    System.out.println(site.getId());
-//                    sitePage.setStatusTime(new Date());
-//                    siteRepository.save(sitePage);
+                    SiteEntity siteEntityPage = siteRepository.findById(siteEntity.getId()).orElseThrow();
+                    System.out.println(siteEntity.getId());
+                    siteEntityPage.setStatusTime(new Date());
+                    siteRepository.saveAndFlush(siteEntityPage);
                     pageRepository.save(indexingPage);
                     lemmaAndIndexService.processPageContent(indexingPage);
 
                     siteMap.addChildren(new SiteMap(link));
-                } catch (Exception ex) {
-                    handlerError(link, ex);
-                }
+
             }
         }
         //Рекурсивный обход дочерних страниц
         List<SiteMapRecursiveAction> taskList = new ArrayList<>();
         for (SiteMap child : siteMap.getSiteMapChildrens()) {
             if (!stopRequested.get()) {
-                SiteMapRecursiveAction task = new SiteMapRecursiveAction(child, site,
+                SiteMapRecursiveAction task = new SiteMapRecursiveAction(child, siteEntity,
                         indexingService, pageRepository,
                         siteRepository, lemmaAndIndexService,
                         stopRequested);
@@ -103,20 +100,20 @@ public class SiteMapRecursiveAction extends RecursiveAction {
             task.join();
         }
         // Завершаем рекурсию только на верхнем уровне
-        if (siteMap.getUrl().equals(site.getUrl())) {
+        if (siteMap.getUrl().equals(siteEntity.getUrl())) {
             updateSiteStatus(); // Обновляем статус сайта после завершения обработки всех страниц
         }
     }
     private void updateSiteStatus() {
-        site.setStatusTime(new Date());
-        site.setStatus(Status.INDEXED); // Пример: установка статуса "INDEXED"
-        siteRepository.saveAndFlush(site);  // Сохраняем изменения в базу данных
+        siteEntity.setStatusTime(new Date());
+        siteEntity.setStatus(Status.INDEXED); // Пример: установка статуса "INDEXED"
+        siteRepository.saveAndFlush(siteEntity);  // Сохраняем изменения в базу данных
     }
 
     private void handlerError(String url, Exception ex) {
         logger.error("Ошибка при обработке страницы {}: {}", url, ex.getMessage());
         Page errorPage = new Page();
-        errorPage.setSite(site);
+        errorPage.setSiteEntity(siteEntity);
         errorPage.setPath(url);
         errorPage.setCode(500);
         errorPage.setContent("Ошибка загрузки страницы: " + ex.getMessage());
@@ -124,10 +121,10 @@ public class SiteMapRecursiveAction extends RecursiveAction {
     }
 
     private void updateSiteStatusFailed(String errorMessage) {
-        site.setStatusTime(new Date());
-        site.setStatus(Status.FAILED); // Устанавливаем статус "FAILED"
-        site.setLastErrorText(errorMessage); // Устанавливаем текст ошибки
-        siteRepository.saveAndFlush(site); // Сохраняем изменения в базе данных
+        siteEntity.setStatusTime(new Date());
+        siteEntity.setStatus(Status.FAILED); // Устанавливаем статус "FAILED"
+        siteEntity.setLastErrorText(errorMessage); // Устанавливаем текст ошибки
+        siteRepository.saveAndFlush(siteEntity); // Сохраняем изменения в базе данных
     }
 
 }

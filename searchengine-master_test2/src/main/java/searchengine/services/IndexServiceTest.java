@@ -3,7 +3,7 @@ package searchengine.services;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.model.Page;
-import searchengine.model.Site;
+import searchengine.model.SiteEntity;
 import searchengine.model.Status;
 import searchengine.repository.PageRepository;
 import searchengine.repository.SiteRepository;
@@ -24,7 +24,7 @@ public class IndexServiceTest {
     @Transactional
     public void insertTestData() {
         // Создаем тестовый сайт
-        Site testSite = new Site();
+        SiteEntity testSite = new SiteEntity();
         testSite.setUrl("https://example.com");
         testSite.setName("Example Test Site");
         testSite.setStatus(Status.INDEXED); // ENUM статус
@@ -37,13 +37,13 @@ public class IndexServiceTest {
 
         // Создаем несколько тестовых страниц
         Page page1 = new Page();
-        page1.setSite(testSite);
+        page1.setSiteEntity(testSite);
         page1.setPath("/test-page-1");
         page1.setCode(200);
         page1.setContent("<html><body><h1>Test Page 1</h1></body></html>");
 
         Page page2 = new Page();
-        page2.setSite(testSite);
+        page2.setSiteEntity(testSite);
         page2.setPath("/test-page-2");
         page2.setCode(404);
         page2.setContent("<html><body><h1>Test Page 2</h1></body></html>");
