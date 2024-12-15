@@ -62,9 +62,9 @@ public class SiteMapRecursiveAction extends RecursiveAction {
                     int code = ParseHtml.getHttpCode(link);
                     String content = ParseHtml.getContent(link);
 
-                    if (content == null || content.isBlank()) {
-                        throw new IllegalStateException("Содержимое страницы пустое: " + url);
-                    }
+//                    if (content == null || content.isBlank()) {
+//                        throw new IllegalStateException("Содержимое страницы пустое: " + link);
+//                    }
                     Page indexingPage = new Page();
                     indexingPage.setSiteEntity(siteEntity);
                     indexingPage.setPath(link);
@@ -99,10 +99,11 @@ public class SiteMapRecursiveAction extends RecursiveAction {
         for (SiteMapRecursiveAction task : taskList) {
             task.join();
         }
-        // Завершаем рекурсию только на верхнем уровне
-        if (siteMap.getUrl().equals(siteEntity.getUrl())) {
-            updateSiteStatus(); // Обновляем статус сайта после завершения обработки всех страниц
-        }
+//        // Завершаем рекурсию только на верхнем уровне
+//        if (siteMap.getUrl().equals(siteEntity.getUrl())) {
+//            updateSiteStatus(); // Обновляем статус сайта после завершения обработки всех страниц
+//        }
+        updateSiteStatus();
     }
     private void updateSiteStatus() {
         siteEntity.setStatusTime(new Date());

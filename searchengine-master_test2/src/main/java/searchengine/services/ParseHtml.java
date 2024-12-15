@@ -22,7 +22,6 @@ public class ParseHtml {
     private static ConcurrentSkipListSet<String> links = new ConcurrentSkipListSet<>();
 
     public static ConcurrentSkipListSet<String> getLinks(String url) {
-        links.clear();
         try {
             String domain = extractDomain(url);
             sleep(150);
@@ -30,7 +29,7 @@ public class ParseHtml {
                     .userAgent(USER_AGENT)
                     .referrer(REFERRER)
                     .ignoreHttpErrors(true)
-                    .timeout(3000)
+                    .timeout(50000)
                     .followRedirects(false);
             Document document = connection.get();
             Elements linkElements = document.select("body").select("a");
@@ -71,7 +70,7 @@ public class ParseHtml {
                     .userAgent(USER_AGENT)
                     .referrer(REFERRER)
                     .ignoreHttpErrors(true)
-                    .timeout(3000)
+                    .timeout(50000)
                     .execute();
 
             return response.statusCode();
@@ -88,7 +87,7 @@ public class ParseHtml {
                     .userAgent(USER_AGENT)
                     .referrer(REFERRER)
                     .ignoreHttpErrors(true)
-                    .timeout(3000)
+                    .timeout(50000)
                     .get();
             return document.html();
         }catch (IOException e){
@@ -98,7 +97,7 @@ public class ParseHtml {
     }
 
     private static boolean isLink(String link, String domain) {
-        String regex = "http[s]?://[^#,\\s]*\\.?"+domain+"\\.ru[^#,\\s]*";
+        String regex = "http[s]?://([a-zA-Z0-9\\-]+\\.)?" + domain + "\\.ru(/.*)?";
         return link.matches(regex);
     }
 

@@ -40,6 +40,9 @@ public class IndexingService {
 
 
     public void startIndexing() {
+        if (forkJoinPool != null && !forkJoinPool.isShutdown()) {
+            forkJoinPool.shutdown();
+        }
         forkJoinPool = new ForkJoinPool();
         stopRequested.set(false);
 
@@ -75,7 +78,7 @@ public class IndexingService {
                             stopRequested);
                     logger.info("Запуск индексации для сайта: {}", siteUrl.getUrl());
                     forkJoinPool.invoke(task);
-                    task.join();
+                   // task.join();
 
                     if (!stopRequested.get()) {
                         //Обновляем статус на Indexed после завершения индексации
@@ -89,6 +92,7 @@ public class IndexingService {
             if (forkJoinPool != null && !forkJoinPool.isShutdown()) {
                 forkJoinPool.shutdown();
             }
+            logger.info("Индексация завершена. Программа готова к дальнейшим действиям.");
         }
     }
 
@@ -114,7 +118,7 @@ public class IndexingService {
 
 
     @Transactional
-    public void stopIndexing(AtomicBoolean stopRequested) {
+    public void stopIndexing() {
         stopRequested.set(true);
         if (forkJoinPool != null && !forkJoinPool.isShutdown()) {
             forkJoinPool.shutdown();
