@@ -48,10 +48,6 @@ public class LemmaAndIndexService {
 
     @Transactional
     public void saveLemma(String lemmaText, Integer frequency, Page page) {
-//        Site managedSite = page.getSite();
-//        if (!managedSite.isManaged()) {
-//            managedSite = siteRepository.findById(managedSite.getId())
-//                    .orElseThrow(() -> new RuntimeException("Сайт не найден"));
         Optional<Lemma> lemmaOptional = lemmaRepository.findByLemmaAndSiteEntityId(lemmaText, page.getSiteEntity().getId());
         if (lemmaOptional.isEmpty()) {
             Lemma newlemma = new Lemma();

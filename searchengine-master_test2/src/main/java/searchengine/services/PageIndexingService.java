@@ -4,16 +4,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import searchengine.config.SitesList;
-import searchengine.model.Index;
-import searchengine.model.Lemma;
-import searchengine.model.Page;
-import searchengine.model.SiteEntity;
+import searchengine.model.*;
 import searchengine.repository.IndexRepository;
 import searchengine.repository.LemmaRepository;
 import searchengine.repository.PageRepository;
 import searchengine.repository.SiteRepository;
 
 import javax.transaction.Transactional;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -48,13 +46,19 @@ public class PageIndexingService {
         }
         try {
             //находим сайт к которому относится Url
-            SiteEntity site = siteRepository.findByUrl(getSiteBaseUrl(url));
-            if (site == null) {
-                throw new IllegalStateException(" Сайт для url не найден в базе данных");
+            SiteEntity siteEntity = siteRepository.findByUrl(getSiteBaseUrl(url));
+            if (siteEntity== null) {
+              siteEntity = new SiteEntity();
+               siteEntity.setUrl(getSiteBaseUrl(url));
+               siteEntity.setName("New");
+               siteEntity.setStatusTime(new Date());
+               siteEntity.setStatus(Status.INDEXING);
+               siteRepository.save(siteEntity);
+
             }
             // Удаляем старую запись, если страница уже существует
 
-            Page existingPage = pageRepository.findByPathAndSiteEntity(url, site).orElse(null);
+            Page existingPage = pageRepository.findByPathAndSiteEntity(url, siteEntity).orElse(null);
             if (existingPage != null) {
                 deleteExistingPageData(existingPage);
                 logger.info("Старая запись для страницы {} удалена",url);
@@ -65,7 +69,7 @@ public class PageIndexingService {
 
             // Создаем и сохраняем новую страницу
             Page page = new Page();
-            page.setSiteEntity(site);
+            page.setSiteEntity(siteEntity);
             page.setPath(url);
             page.setCode(httpCode);
             page.setContent(content);

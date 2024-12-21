@@ -45,20 +45,19 @@ public class SiteMapRecursiveAction extends RecursiveAction {
             return;
         }
         String url = siteMap.getUrl();
+        linksPool.add(url);
 
-        if (!linksPool.contains(url)) {
-            linksPool.add(url);
-        } else {
-            return;
+//        if (!linksPool.contains(url)) {
+//            linksPool.add(url);
+//        } else {
+//            return;
+//        }
 
-        }
         ConcurrentSkipListSet<String> links = ParseHtml.getLinks(url);
         for (String link : links) {
             if (!linksPool.contains(link)) {
-                linksPool.add(link);
 
                 // получаем HTTP код и контент страницы
-
                     int code = ParseHtml.getHttpCode(link);
                     String content = ParseHtml.getContent(link);
 
@@ -79,8 +78,9 @@ public class SiteMapRecursiveAction extends RecursiveAction {
                     lemmaAndIndexService.processPageContent(indexingPage);
 
                     siteMap.addChildren(new SiteMap(link));
-
+                    linksPool.add(link);
             }
+
         }
         //Рекурсивный обход дочерних страниц
         List<SiteMapRecursiveAction> taskList = new ArrayList<>();
