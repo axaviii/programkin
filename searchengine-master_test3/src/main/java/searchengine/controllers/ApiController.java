@@ -80,15 +80,17 @@ public class ApiController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<SearchResult>> search(
+    public ResponseEntity<SearchResult> search(
             @RequestParam("query") String query,
-            @RequestParam (required = false) String site,
+            @RequestParam(required = false) String site,
             @RequestParam(required = false, defaultValue = "0") Integer offset,
             @RequestParam(required = false, defaultValue = "20") Integer limit)
-            {
-        List<SearchResult> results = searchService.search(query, site, offset, limit);
-        return ResponseEntity.ok(results);
-
+    {
+        SearchResult result = searchService.search(query, site, offset, limit);
+        if (result.isResult()) {
+            return ResponseEntity.ok(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        }
     }
-
 }

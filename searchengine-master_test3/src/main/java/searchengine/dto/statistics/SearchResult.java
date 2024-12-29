@@ -12,6 +12,10 @@ public class SearchResult {
     private List<DataSearchItem> data;
     private String error;
 
-
-
+    public SearchResult(boolean result, Integer count, List<DataSearchItem> data, String error) {
+        this.result = result;
+        this.count = count;
+        this.data = data;
+        this.error = error;
+    }
 }

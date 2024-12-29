@@ -2,6 +2,7 @@ package searchengine.services;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import searchengine.dto.statistics.DataSearchItem;
 import searchengine.dto.statistics.SearchResult;
 import searchengine.model.*;
 import searchengine.repository.IndexRepository;
@@ -33,25 +34,26 @@ public class SearchService {
         this.indexRepository = indexRepository;
     }
 @Transactional
-    public List<SearchResult> search(String query, String siteUrl, Integer offset, Integer limit) {
+    public SearchResult search(String query, String siteUrl, Integer offset, Integer limit) {
         List<String> lemmas = extractLemmas(query);
         if (lemmas.isEmpty()) {
-            return Collections.emptyList();
+            return new SearchResult(false, 0, Collections.emptyList(), "не найдены леммы в запросе");
         }
         // получаем siteId для siteUrl
         Optional<SiteEntity> siteEntity = Optional.ofNullable(siteRepository.findByUrl(siteUrl));
         if (siteEntity.isEmpty()) {
-            return Collections.emptyList();
+            return new SearchResult(false, 0, Collections.emptyList(), "сайт не найден");
         }
         int siteEntityId = siteEntity.get().getId();
         List<String> sortedLemmas = sortLemmasByFrequency(lemmas, siteEntityId);
         List<Page> pages = findMatchingPages(sortedLemmas, siteEntityId);
         if (pages.isEmpty()) {
-            return Collections.emptyList();
+            return new SearchResult(false, 0, Collections.emptyList(), "нет нужных страниц");
         }
 
         Map<Page, Double> relevanceMap = calculateRelevance(pages, sortedLemmas, siteEntityId);
-        return buildSearchResults(relevanceMap, query);
+        List<DataSearchItem> dataItems = buildSearchResults(relevanceMap, query, siteEntity.get(), offset, limit);
+        return new SearchResult(true, dataItems.size(),dataItems, null);
     }
 
     //метод принимает поисковый запрос и возвращает список уникальных лемм
@@ -130,17 +132,25 @@ public class SearchService {
         return relevanceMap;
     }
 
-    private List<SearchResult> buildSearchResults(Map<Page, Double> relevanceMap, String query) {
+    private List<DataSearchItem> buildSearchResults(Map<Page, Double> relevanceMap, String query, SiteEntity siteEntity, int offset, int limit) {
         return relevanceMap
                 .entrySet()
                 .stream()
                 //сортируем поток по значению релевантность в обратном порядке от большего к меньшему
                 .sorted(Map.Entry.<Page, Double>comparingByValue().reversed())
+                .skip(offset != null ? offset : 0)
+                .limit(limit != null ? limit : Long.MAX_VALUE)
                 .map(entry -> {
                     Page page = entry.getKey();
                     String snippet = generateSnippet(page.getContent(), extractLemmas(query));
                     String title = lemmasFinder.extractTitle(page.getContent());
-                    return new SearchResult(page.getPath(), title, snippet, entry.getValue());
+                    return new DataSearchItem(
+                            siteEntity.getUrl(),
+                            siteEntity.getName(),
+                            page.getPath(),
+                            title,
+                            snippet,
+                            entry.getValue());
                 })
                 .collect(Collectors.toList());
     }
