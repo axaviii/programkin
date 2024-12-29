@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import searchengine.dto.statistics.StatisticsResponse;
-import searchengine.model.SearchResult;
+import searchengine.dto.statistics.SearchResult;
 import searchengine.services.IndexingService;
 import searchengine.services.PageIndexingService;
 import searchengine.services.SearchService;
