@@ -3,6 +3,7 @@ package searchengine.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.config.SitesList;
@@ -36,7 +37,7 @@ public class IndexingService {
         this.parseHtml = parseHtml;
         this.lemmaAndIndexService = lemmaAndIndexService;
     }
-
+    @Async
     public void startIndexing() {
         if (forkJoinPool != null && !forkJoinPool.isShutdown()) {
             forkJoinPool.shutdown();
