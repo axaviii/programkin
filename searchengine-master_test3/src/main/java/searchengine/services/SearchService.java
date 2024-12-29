@@ -2,10 +2,7 @@ package searchengine.services;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import searchengine.model.Lemma;
-import searchengine.model.Page;
-import searchengine.model.SearchResult;
-import searchengine.model.SiteEntity;
+import searchengine.model.*;
 import searchengine.repository.IndexRepository;
 import searchengine.repository.LemmaRepository;
 import searchengine.repository.PageRepository;
@@ -35,7 +32,7 @@ public class SearchService {
         this.indexRepository = indexRepository;
     }
 @Transactional
-    public List<SearchResult> search(String query, String siteUrl) {
+    public List<SearchResult> search(String query, String siteUrl, Integer offset, Integer limit) {
         List<String> lemmas = extractLemmas(query);
         if (lemmas.isEmpty()) {
             return Collections.emptyList();
@@ -86,7 +83,7 @@ public class SearchService {
         if (initialLemmas.isEmpty()) {
             return Collections.emptyList();
         }
-        List<Page> matchingPages = pageRepository.findPagesByLemmaId(initialLemmas.get(0).getId());
+        List<Index> matchingIndexes = indexRepository.findPagesByLemmaId(initialLemmas.get(0).getId());
 
 
         for (int i = 1; i < lemmas.size(); i++) {
@@ -97,13 +94,16 @@ public class SearchService {
             }
             int lemmaId = lemmaEntity.get().getId();
 
-            List<Page> currentLemmaPages = pageRepository.findPagesByLemmaId(lemmaId);
-                    matchingPages.retainAll(currentLemmaPages);// остаются только пересечения
-            if (matchingPages.isEmpty()) {
+            List<Index> currentIndexes = indexRepository.findPagesByLemmaId(lemmaId);
+                    matchingIndexes.retainAll(currentIndexes);// остаются только пересечения
+            if (matchingIndexes.isEmpty()) {
                 break;
             }
         }
-        return matchingPages;
+        return matchingIndexes.stream()
+                .map(Index:: getPage)
+                .distinct()
+                .toList();
     }
 
     //для каждой найденной страницы рассчитать абсолютную релевантность
