@@ -2,6 +2,7 @@ package searchengine.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import searchengine.model.Index;
 import searchengine.model.Page;
 import searchengine.model.SiteEntity;
 
@@ -14,4 +15,6 @@ public interface PageRepository extends JpaRepository<Page, Integer> {
 
     Optional<Page> findByPathAndSiteEntity(String path, SiteEntity siteEntity);
     int countBySiteEntityId(Integer siteEntityId);
+
+    List<Page> findPagesByLemmaId(Integer lemmaId);
 }

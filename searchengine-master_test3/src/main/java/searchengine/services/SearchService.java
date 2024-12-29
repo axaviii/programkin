@@ -86,7 +86,7 @@ public class SearchService {
         if (initialLemmas.isEmpty()) {
             return Collections.emptyList();
         }
-        List<Page> matchingPages = indexRepository.findPagesByLemmaId(initialLemmas.get(0).getId());
+        List<Page> matchingPages = pageRepository.findPagesByLemmaId(initialLemmas.get(0).getId());
 
 
         for (int i = 1; i < lemmas.size(); i++) {
@@ -97,7 +97,7 @@ public class SearchService {
             }
             int lemmaId = lemmaEntity.get().getId();
 
-            List<Page> currentLemmaPages = indexRepository.findPagesByLemmaId(lemmaId);
+            List<Page> currentLemmaPages = pageRepository.findPagesByLemmaId(lemmaId);
                     matchingPages.retainAll(currentLemmaPages);// остаются только пересечения
             if (matchingPages.isEmpty()) {
                 break;
