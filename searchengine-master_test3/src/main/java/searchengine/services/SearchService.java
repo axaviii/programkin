@@ -33,28 +33,52 @@ public class SearchService {
         this.lemmaRepository = lemmaRepository;
         this.indexRepository = indexRepository;
     }
-@Transactional
+
+    @Transactional
     public SearchResult search(String query, String siteUrl, Integer offset, Integer limit) {
         List<String> lemmas = extractLemmas(query);
         if (lemmas.isEmpty()) {
             return new SearchResult(false, 0, Collections.emptyList(), "не найдены леммы в запросе");
         }
-        // получаем siteId для siteUrl
-        Optional<SiteEntity> siteEntity = Optional.ofNullable(siteRepository.findByUrl(siteUrl));
-        if (siteEntity.isEmpty()) {
-            return new SearchResult(false, 0, Collections.emptyList(), "сайт не найден");
+
+        if (siteUrl != null) {
+            // получаем siteId для siteUrl
+            SiteEntity siteEntity = siteRepository.findByUrl(siteUrl);
+            if (siteEntity == null) {
+                return new SearchResult(false, 0, Collections.emptyList(), "сайт не найден");
+            }
+            return oneSiteSearch(query, lemmas, siteEntity, offset, limit);
+        } else {
+            // поиск по всем сайтам
+            List<SiteEntity> siteEntities = siteRepository.findAll();
+            if (siteEntities.isEmpty()) {
+                return new SearchResult(false, 0, Collections.emptyList(), "Нет доступных сайтов для поиска");
+            }
+
+            List<DataSearchItem> allSiteResults = new ArrayList<>();
+            for (SiteEntity siteEntity : siteEntities) {
+                SearchResult searchResult = oneSiteSearch(query, lemmas, siteEntity, offset, limit);
+                if(searchResult.isResult()){
+                    allSiteResults.addAll(searchResult.getData());
+                }
+            }
+            return new SearchResult(true, allSiteResults.size(), allSiteResults, null);
         }
-        int siteEntityId = siteEntity.get().getId();
+    }
+
+    private SearchResult oneSiteSearch(String query, List<String> lemmas, SiteEntity siteEntity, Integer offset, Integer limit) {
+        int siteEntityId = siteEntity.getId();
         List<String> sortedLemmas = sortLemmasByFrequency(lemmas, siteEntityId);
         List<Page> pages = findMatchingPages(sortedLemmas, siteEntityId);
         if (pages.isEmpty()) {
-            return new SearchResult(false, 0, Collections.emptyList(), "нет нужных страниц");
+            return new SearchResult(false, 0, Collections.emptyList(), "нет нужных страниц для сайта");
         }
 
         Map<Page, Double> relevanceMap = calculateRelevance(pages, sortedLemmas, siteEntityId);
-        List<DataSearchItem> dataItems = buildSearchResults(relevanceMap, query, siteEntity.get(), offset, limit);
-        return new SearchResult(true, dataItems.size(),dataItems, null);
+        List<DataSearchItem> dataItems = buildSearchResults(relevanceMap, query, siteEntity, offset, limit);
+        return new SearchResult(true, dataItems.size(), dataItems, null);
     }
+
 
     //метод принимает поисковый запрос и возвращает список уникальных лемм
     private List<String> extractLemmas(String query) {
