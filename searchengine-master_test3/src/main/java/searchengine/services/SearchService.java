@@ -73,10 +73,11 @@ public class SearchService {
         if (pages.isEmpty()) {
             return new SearchResult(false, 0, Collections.emptyList(), "нет нужных страниц для сайта");
         }
+        int totalPagesCount = pages.size();
 
         Map<Page, Double> relevanceMap = calculateRelevance(pages, sortedLemmas, siteEntityId);
         List<DataSearchItem> dataItems = buildSearchResults(relevanceMap, query, siteEntity, offset, limit);
-        return new SearchResult(true, dataItems.size(), dataItems, null);
+        return new SearchResult(true, totalPagesCount, dataItems, null);
     }
 
 
