@@ -56,13 +56,15 @@ public class SearchService {
             }
 
             List<DataSearchItem> allSiteResults = new ArrayList<>();
+            int totalPagesCount = 0;
             for (SiteEntity siteEntity : siteEntities) {
                 SearchResult searchResult = oneSiteSearch(query, lemmas, siteEntity, offset, limit);
                 if(searchResult.isResult()){
+                    totalPagesCount += searchResult.getCount();
                     allSiteResults.addAll(searchResult.getData());
                 }
             }
-            return new SearchResult(true, allSiteResults.size(), allSiteResults, null);
+            return new SearchResult(true, totalPagesCount, allSiteResults, null);
         }
     }
 
