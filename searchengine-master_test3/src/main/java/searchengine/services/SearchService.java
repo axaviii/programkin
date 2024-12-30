@@ -165,7 +165,7 @@ public class SearchService {
                 //сортируем поток по значению релевантность в обратном порядке от большего к меньшему
                 .sorted(Map.Entry.<Page, Double>comparingByValue().reversed())
                 .skip(offset != null ? offset : 0)
-                .limit(limit != null ? limit : Long.MAX_VALUE)
+                .limit(limit != null ? limit : 20)
                 .map(entry -> {
                     Page page = entry.getKey();
                     String fullPath = page.getPath();
