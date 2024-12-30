@@ -157,6 +157,8 @@ public class SearchService {
     }
 
     private List<DataSearchItem> buildSearchResults(Map<Page, Double> relevanceMap, String query, SiteEntity siteEntity, Integer offset, Integer limit) {
+
+        String siteRootUrl = siteEntity.getUrl().endsWith("/") ? siteEntity.getUrl() : siteEntity.getUrl() + "/";
         return relevanceMap
                 .entrySet()
                 .stream()
@@ -166,12 +168,14 @@ public class SearchService {
                 .limit(limit != null ? limit : Long.MAX_VALUE)
                 .map(entry -> {
                     Page page = entry.getKey();
+                    String fullPath = page.getPath();
+                    String relativePath = fullPath.substring(siteRootUrl.length());
                     String snippet = generateSnippet(page.getContent(), extractLemmas(query));
                     String title = lemmasFinder.extractTitle(page.getContent());
                     return new DataSearchItem(
                             siteEntity.getUrl(),
                             siteEntity.getName(),
-                            page.getPath(),
+                            relativePath,
                             title,
                             snippet,
                             entry.getValue());
