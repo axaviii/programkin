@@ -132,7 +132,7 @@ public class SearchService {
         return relevanceMap;
     }
 
-    private List<DataSearchItem> buildSearchResults(Map<Page, Double> relevanceMap, String query, SiteEntity siteEntity, int offset, int limit) {
+    private List<DataSearchItem> buildSearchResults(Map<Page, Double> relevanceMap, String query, SiteEntity siteEntity, Integer offset, Integer limit) {
         return relevanceMap
                 .entrySet()
                 .stream()
