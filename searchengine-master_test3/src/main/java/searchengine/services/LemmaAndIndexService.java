@@ -52,7 +52,7 @@ public class LemmaAndIndexService {
         if (lemmaOptional.isEmpty()) {
             Lemma newlemma = new Lemma();
             newlemma.setLemma(lemmaText);
-            newlemma.setFrequency(0);
+            newlemma.setFrequency(1);
             newlemma.setSiteEntity(page.getSiteEntity());
             lemmaRepository.saveAndFlush(newlemma);
         } else {
