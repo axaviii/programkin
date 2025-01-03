@@ -15,7 +15,10 @@ public class LemmaFinder {
     private static final String RUSSIAN_WORLD_REGEX = "[а-яА-ЯёЁ]+$";
     private static final String ENGLISH_WORLD_REGEX = "[a-zA-Z]+$";
     private static final String WORD_TYPE_REGEX = "\\W\\w&&[^а-яА-Я\\s]";
-    private static final String[] particlesNames = new String[] {"МЕЖД", "ПРЕДЛ", "СОЮЗ"};
+    private static final String[] particlesNames =
+            new String[] {"МЕЖД", "ПРЕДЛ", "СОЮЗ",
+                         "ARTICLE", "CONJ", "PREP"
+                          };
 
     public LemmaFinder(LuceneMorphology russianMorphology, LuceneMorphology englishMorphology) {
         this.russianMorphology = russianMorphology;
