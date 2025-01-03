@@ -57,7 +57,7 @@ public class LemmaFinder {
                 continue;
             }
             LuceneMorphology morphology = getMorphology(word);
-            if (morphology != null) {
+            if (morphology == null) {
                 continue;
             }
 
