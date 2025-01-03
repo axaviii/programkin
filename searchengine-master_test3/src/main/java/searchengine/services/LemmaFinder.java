@@ -88,7 +88,7 @@ public class LemmaFinder {
         for(String word : textArray){
             if(!word.isEmpty() /*&& isCorrectWordForm(word)*/){
                 LuceneMorphology morphology = getMorphology(word);
-                if (morphology != null) {
+                if (morphology == null) {
                     continue;
                 }
                 List<String> wordBaseForms = morphology.getMorphInfo(word);
