@@ -99,7 +99,8 @@ public class PageIndexingService {
         List<Index> indexes = indexRepository.findByPage(page);
         for (Index index : indexes) {
             Lemma lemma = index.getLemma();
-
+            //удаляем запись из index
+            indexRepository.delete(index);
             //уменьшаем частоту леммы
             lemma.setFrequency(lemma.getFrequency() - 1);
             if (lemma.getFrequency() <= 0) {
@@ -107,8 +108,7 @@ public class PageIndexingService {
             } else {
                 lemmaRepository.save(lemma);
             }
-            //удаляем запись из index
-            indexRepository.delete(index);
+
         }
         pageRepository.delete(page);
     }
