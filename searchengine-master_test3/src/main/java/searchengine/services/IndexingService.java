@@ -55,9 +55,8 @@ public class IndexingService {
 
                     SiteEntity existSiteEntity = siteRepository.findByUrl(siteUrl.getUrl());
                     if (existSiteEntity != null) {
-                        logger.info("Удаление существующего сайта: {}", existSiteEntity.getUrl());
-                        pageRepository.deleteBySiteEntity(existSiteEntity);
-                        siteRepository.deleteById(existSiteEntity.getId());
+
+                       deleteSiteData(existSiteEntity);
                     }
                     //Создаем новую запись для сайта со статусом Indexing
                     SiteEntity siteEntity = new SiteEntity();
@@ -93,6 +92,12 @@ public class IndexingService {
             }
             logger.info("Индексация завершена. Программа готова к дальнейшим действиям.");
         }
+    }
+    @Transactional
+    public void deleteSiteData(SiteEntity siteEntity) {
+        pageRepository.deleteBySiteEntity(siteEntity);
+        siteRepository.deleteById(siteEntity.getId());
+        logger.info("Удаление существующего сайта: {}", siteEntity.getUrl());
     }
 
     private void updateSiteStatus(SiteEntity siteEntity, Status status, String errorText) {

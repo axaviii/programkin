@@ -3,6 +3,7 @@ package searchengine.controllers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import searchengine.dto.statistics.IndexingResponse;
 import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.dto.statistics.SearchResult;
 import searchengine.services.IndexingService;
@@ -39,43 +40,39 @@ public class ApiController {
     }
 
     @GetMapping("/startIndexing")
-    public ResponseEntity<String> startIndexing() {
+    public ResponseEntity<IndexingResponse> startIndexing() {
         if (!stopRequested.get()) {
             indexingService.startIndexing();
-            return ResponseEntity.ok("Indexing started");
+            return ResponseEntity.ok(new IndexingResponse());
         }else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка при" +
-                    "запуске индексации");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new IndexingResponse("Ошибка при запуске индексации"));
         }
     }
 
     @GetMapping("/stopIndexing")
-    public ResponseEntity<String> stopIndexing() {
+    public ResponseEntity<IndexingResponse> stopIndexing() {
         try {
             indexingService.stopIndexing();
-            return ResponseEntity.ok("Indexing end");
+            return ResponseEntity.ok(new IndexingResponse());
         }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Индексация не запущена" +
-                    e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new IndexingResponse("Индексация не запущена" +
+                    e.getMessage()));
         }
     }
     @PostMapping("/indexPage")
-    public ResponseEntity<Map<String, Object>> indexPage(@RequestParam("url") String url){
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<IndexingResponse> indexPage(@RequestParam("url") String url){
         if(!pageIndexingService.isUrlWithinConfiguredSites(url)){
-            response.put("result", false);
-            response.put("error", "Данная страница находится за пределами сайтов, указанных в конф файле");
-            return ResponseEntity.badRequest().body(response);
+            String errorMessage = "Данная страница находится за пределами сайтов, указанных в конф файле";
+            return ResponseEntity.badRequest().body(new IndexingResponse(errorMessage));
         }
-
         try {
             pageIndexingService.indexPage(url);
-            response.put("result", true);
-            return ResponseEntity.ok(response);
+
+            return ResponseEntity.ok(new IndexingResponse());
         } catch (Exception e){
-            response.put("result", false);
-            response.put("error", "Ошибка индексации" + e.getMessage());
-            return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            String errorMessage = "Ошибка индексации страницы" + e.getMessage();
+            return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new IndexingResponse(errorMessage));
         }
     }
 
