@@ -27,15 +27,17 @@ public class IndexingService {
     private AtomicBoolean stopRequested = new AtomicBoolean(false);
     private final ParseHtml parseHtml;
     private final LemmaAndIndexService lemmaAndIndexService;
+    private final SiteManagementService siteManagementService;
     private ForkJoinPool forkJoinPool;
 
-    public IndexingService(SiteRepository siteRepository, PageRepository pageRepository, SitesList sitesList, LemmaFinder lemmaFinder, ParseHtml parseHtml, LemmaAndIndexService lemmaAndIndexService) {
+    public IndexingService(SiteRepository siteRepository, PageRepository pageRepository, SitesList sitesList, LemmaFinder lemmaFinder, ParseHtml parseHtml, LemmaAndIndexService lemmaAndIndexService, SiteManagementService siteManagementService) {
         this.siteRepository = siteRepository;
         this.pageRepository = pageRepository;
         this.sitesList = sitesList;
         this.lemmaFinder = lemmaFinder;
         this.parseHtml = parseHtml;
         this.lemmaAndIndexService = lemmaAndIndexService;
+        this.siteManagementService = siteManagementService;
     }
     @Async
     public void startIndexing() {
@@ -56,7 +58,7 @@ public class IndexingService {
                     SiteEntity existSiteEntity = siteRepository.findByUrl(siteUrl.getUrl());
                     if (existSiteEntity != null) {
 
-                       deleteSiteData(existSiteEntity);
+                       siteManagementService.deleteSiteData(existSiteEntity);
                     }
                     //Создаем новую запись для сайта со статусом Indexing
                     SiteEntity siteEntity = new SiteEntity();
@@ -93,12 +95,7 @@ public class IndexingService {
             logger.info("Индексация завершена. Программа готова к дальнейшим действиям.");
         }
     }
-    @Transactional
-    public void deleteSiteData(SiteEntity siteEntity) {
-        pageRepository.deleteBySiteEntity(siteEntity);
-        siteRepository.deleteById(siteEntity.getId());
-        logger.info("Удаление существующего сайта: {}", siteEntity.getUrl());
-    }
+
 
     private void updateSiteStatus(SiteEntity siteEntity, Status status, String errorText) {
         siteEntity.setStatus(status);
