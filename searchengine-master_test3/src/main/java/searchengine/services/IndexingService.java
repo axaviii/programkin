@@ -39,6 +39,7 @@ public class IndexingService {
         this.lemmaAndIndexService = lemmaAndIndexService;
         this.siteManagementService = siteManagementService;
     }
+
     @Async
     public void startIndexing() {
         if (forkJoinPool != null && !forkJoinPool.isShutdown()) {
@@ -55,37 +56,37 @@ public class IndexingService {
                 }
                 logger.info("Начало индексации сайта: {}", siteUrl.getUrl());
 
-                    SiteEntity existSiteEntity = siteRepository.findByUrl(siteUrl.getUrl());
-                    if (existSiteEntity != null) {
+                SiteEntity existSiteEntity = siteRepository.findByUrl(siteUrl.getUrl());
+                if (existSiteEntity != null) {
 
-                       siteManagementService.deleteSiteData(existSiteEntity);
-                    }
-                    //Создаем новую запись для сайта со статусом Indexing
-                    SiteEntity siteEntity = new SiteEntity();
-                    siteEntity.setUrl(siteUrl.getUrl());
-                    siteEntity.setName(siteUrl.getName());
-                    siteEntity.setStatus(Status.INDEXING);
-                    siteEntity.setStatusTime(new Date());
-                    logger.info("Создание новой записи для сайта: {}", siteUrl.getUrl());
-                    siteRepository.save(siteEntity);
-                    logger.info("Сохраненный сайт: ID={}, URL={}", siteEntity.getId(), siteEntity.getUrl());
+                    siteManagementService.deleteSiteData(existSiteEntity);
+                }
+                //Создаем новую запись для сайта со статусом Indexing
+                SiteEntity siteEntity = new SiteEntity();
+                siteEntity.setUrl(siteUrl.getUrl());
+                siteEntity.setName(siteUrl.getName());
+                siteEntity.setStatus(Status.INDEXING);
+                siteEntity.setStatusTime(new Date());
+                logger.info("Создание новой записи для сайта: {}", siteUrl.getUrl());
+                siteRepository.save(siteEntity);
+                logger.info("Сохраненный сайт: ID={}, URL={}", siteEntity.getId(), siteEntity.getUrl());
 
 
-                    //Запускаем индексацию сайта
-                    SiteMap siteMap = new SiteMap(siteUrl.getUrl());
-                    SiteMapRecursiveAction task = new SiteMapRecursiveAction(siteMap, siteEntity,
-                            this, pageRepository, siteRepository, lemmaAndIndexService,
-                            stopRequested);
-                    logger.info("Запуск индексации для сайта: {}", siteUrl.getUrl());
-                    forkJoinPool.invoke(task);
-                   // task.join();
+                //Запускаем индексацию сайта
+                SiteMap siteMap = new SiteMap(siteUrl.getUrl());
+                SiteMapRecursiveAction task = new SiteMapRecursiveAction(siteMap, siteEntity,
+                        this, pageRepository, siteRepository, lemmaAndIndexService,
+                        stopRequested);
+                logger.info("Запуск индексации для сайта: {}", siteUrl.getUrl());
+                forkJoinPool.invoke(task);
+                // task.join();
 
-                    if (!stopRequested.get()) {
-                        //Обновляем статус на Indexed после завершения индексации
-                       updateSiteStatus(siteEntity, Status.INDEXED, null);
-                    }else {
-                        updateSiteStatus(siteEntity, Status.FAILED,"Индексация остановлена пользователем");
-                    }
+                if (!stopRequested.get()) {
+                    //Обновляем статус на Indexed после завершения индексации
+                    updateSiteStatus(siteEntity, Status.INDEXED, null);
+                } else {
+                    updateSiteStatus(siteEntity, Status.FAILED, "Индексация остановлена пользователем");
+                }
             }
         } finally {
             stopRequested.set(false);
@@ -95,7 +96,6 @@ public class IndexingService {
             logger.info("Индексация завершена. Программа готова к дальнейшим действиям.");
         }
     }
-
 
     private void updateSiteStatus(SiteEntity siteEntity, Status status, String errorText) {
         siteEntity.setStatus(status);
@@ -116,7 +116,6 @@ public class IndexingService {
             siteRepository.save(faildSiteEntity);
         }
     }
-
 
     @Transactional
     public void stopIndexing() {

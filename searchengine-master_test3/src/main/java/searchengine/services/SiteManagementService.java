@@ -19,7 +19,6 @@ public class SiteManagementService {
         this.pageRepository = pageRepository;
     }
 
-
     @Transactional
     public void deleteSiteData(SiteEntity siteEntity) {
         pageRepository.deleteBySiteEntity(siteEntity);

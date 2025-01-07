@@ -91,10 +91,6 @@ public class SiteMapRecursiveAction extends RecursiveAction {
         for (SiteMapRecursiveAction task : taskList) {
             task.join();
         }
-//        // Завершаем рекурсию только на верхнем уровне
-//        if (siteMap.getUrl().equals(siteEntity.getUrl())) {
-//            updateSiteStatus(); // Обновляем статус сайта после завершения обработки всех страниц
-//        }
         updateSiteStatus();
     }
     private void updateSiteStatus() {
