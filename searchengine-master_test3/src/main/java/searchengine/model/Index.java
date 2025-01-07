@@ -19,7 +19,7 @@ public class Index {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "page_id", nullable = false)
     private Page page;
 
