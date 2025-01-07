@@ -40,7 +40,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             item.setName(siteEntity.getName());
             item.setUrl(siteEntity.getUrl());
             int pages = pageRepository.countBySiteEntityId(siteEntity.getId());
-            int lemmas = lemmaRepository.countBySiteEntity(siteEntity.getId());
+            int lemmas = lemmaRepository.countBySiteEntityId(siteEntity.getId());
             item.setPages(pages);
             item.setLemmas(lemmas);
             item.setStatus(siteEntity.getStatus().toString());
