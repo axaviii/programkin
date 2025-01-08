@@ -66,7 +66,7 @@ public class SiteMapRecursiveAction extends RecursiveAction {
         siteRepository.saveAndFlush(siteEntityPage);
         pageRepository.save(indexingPage);
         lemmaAndIndexService.processPageContent(indexingPage);
-        linksPool.add(url);
+       // linksPool.add(url); 
 
         ConcurrentSkipListSet<String> links = ParseHtml.getLinks(url);
         for (String link : links) {
