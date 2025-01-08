@@ -125,19 +125,6 @@ public class LemmaFinder {
                 .split("\\s+");
     }
 
-
-
-
-   /* private boolean isCorrectWordForm(String word){
-        List<String> wordInfo = luceneMorphology.getMorphInfo(word);
-        for (String morphInfo : wordInfo){
-            if(morphInfo.contains(WORD_TYPE_REGEX)){
-                return false;
-            }
-        }
-        return true;
-    }*/
-
     /**
      * Метод очищает HTML-код и возвращает только текст.
      *

@@ -26,12 +26,12 @@ public class SiteMapRecursiveAction extends RecursiveAction {
     private final static ConcurrentSkipListSet<String> linksPool = new ConcurrentSkipListSet<>();
     private static final Logger logger = LoggerFactory.getLogger(SiteMapRecursiveAction.class);
     private final AtomicBoolean stopRequested;
-    private final SiteManagementService siteManagementService;
+
 
     public SiteMapRecursiveAction(SiteMap siteMap, SiteEntity site, IndexingService indexingService,
                                   PageRepository pageRepository, SiteRepository siteRepository,
-                                  LemmaAndIndexService lemmaAndIndexService, AtomicBoolean stopRequested,
-                                  SiteManagementService siteManagementService) {
+                                  LemmaAndIndexService lemmaAndIndexService, AtomicBoolean stopRequested)
+                                 {
         this.siteMap = siteMap;
         this.siteEntity = site;
         this.indexingService = indexingService;
@@ -39,7 +39,7 @@ public class SiteMapRecursiveAction extends RecursiveAction {
         this.siteRepository = siteRepository;
         this.lemmaAndIndexService = lemmaAndIndexService;
         this.stopRequested = stopRequested;
-        this.siteManagementService = siteManagementService;
+
     }
 
     @Override
@@ -53,14 +53,9 @@ public class SiteMapRecursiveAction extends RecursiveAction {
             return;
         }
         linksPool.add(url);
-
         // получаем HTTP код и контент страницы
         int code = ParseHtml.getHttpCode(url);
         String content = ParseHtml.getContent(url);
-
-//                    if (content == null || content.isBlank()) {
-//                        throw new IllegalStateException("Содержимое страницы пустое: " + link);
-//                    }
         Page indexingPage = new Page();
         indexingPage.setSiteEntity(siteEntity);
         indexingPage.setPath(url);
@@ -87,18 +82,16 @@ public class SiteMapRecursiveAction extends RecursiveAction {
                 SiteMapRecursiveAction task = new SiteMapRecursiveAction(child, siteEntity,
                         indexingService, pageRepository,
                         siteRepository, lemmaAndIndexService,
-                        stopRequested, siteManagementService);
+                        stopRequested);
                 task.fork();
                 taskList.add(task);
             }
             updateSiteStatus();
         }
-
         // Ожидаем завершения всех задач
         for (SiteMapRecursiveAction task : taskList) {
             task.join();
         }
-
     }
 
     public static void clearLinksPool() {
@@ -126,7 +119,6 @@ public class SiteMapRecursiveAction extends RecursiveAction {
         siteEntity.setLastErrorText(errorMessage); // Устанавливаем текст ошибки
         siteRepository.saveAndFlush(siteEntity); // Сохраняем изменения в базе данных
     }
-
 }
 
 
