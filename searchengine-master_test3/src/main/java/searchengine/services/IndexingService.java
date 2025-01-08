@@ -76,7 +76,7 @@ public class IndexingService {
                 SiteMap siteMap = new SiteMap(siteUrl.getUrl());
                 SiteMapRecursiveAction task = new SiteMapRecursiveAction(siteMap, siteEntity,
                         this, pageRepository, siteRepository, lemmaAndIndexService,
-                        stopRequested);
+                        stopRequested,siteManagementService);
                 logger.info("Запуск индексации для сайта: {}", siteUrl.getUrl());
                 forkJoinPool.invoke(task);
                 // task.join();

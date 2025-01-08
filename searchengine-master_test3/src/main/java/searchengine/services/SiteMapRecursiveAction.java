@@ -57,12 +57,16 @@ public class SiteMapRecursiveAction extends RecursiveAction {
 //                    if (content == null || content.isBlank()) {
 //                        throw new IllegalStateException("Содержимое страницы пустое: " + link);
 //                    }
-
+        Page indexingPage = new Page();
+        indexingPage.setSiteEntity(siteEntity);
+        indexingPage.setPath(url);
+        indexingPage.setCode(code);
+        indexingPage.setContent(content);
         SiteEntity siteEntityPage = siteRepository.findById(siteEntity.getId()).orElseThrow();
         System.out.println(siteEntity.getId());
         siteEntityPage.setStatusTime(new Date());
         siteRepository.saveAndFlush(siteEntityPage);
-       siteManagementService.savePageData(siteEntity,url, code,content);
+       siteManagementService.savePageData(indexingPage);
         lemmaAndIndexService.processPageContent(indexingPage);
        // linksPool.add(url);
 

@@ -32,13 +32,7 @@ public class SiteManagementService {
     }
 
     @Transactional
-    public void savePageData(SiteEntity siteEntity, String url, Integer code, String content) {
-        Page indexingPage = new Page();
-        indexingPage.setSiteEntity(siteEntity);
-        indexingPage.setPath(url);
-        indexingPage.setCode(code);
-        indexingPage.setContent(content);
+    public void savePageData(Page indexingPage) {
         pageRepository.save(indexingPage);
     }
-
 }
