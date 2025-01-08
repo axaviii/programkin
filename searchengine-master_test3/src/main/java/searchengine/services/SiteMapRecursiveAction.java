@@ -90,13 +90,14 @@ public class SiteMapRecursiveAction extends RecursiveAction {
                 task.fork();
                 taskList.add(task);
             }
+            updateSiteStatus();
         }
 
         // Ожидаем завершения всех задач
         for (SiteMapRecursiveAction task : taskList) {
             task.join();
         }
-        updateSiteStatus();
+
     }
 
     public static void clearLinksPool() {
@@ -105,7 +106,6 @@ public class SiteMapRecursiveAction extends RecursiveAction {
 
     private void updateSiteStatus() {
         siteEntity.setStatusTime(new Date());
-        siteEntity.setStatus(Status.INDEXED); // Пример: установка статуса "INDEXED"
         siteRepository.saveAndFlush(siteEntity);  // Сохраняем изменения в базу данных
     }
 
