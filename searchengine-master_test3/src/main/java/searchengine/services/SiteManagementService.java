@@ -30,9 +30,4 @@ public class SiteManagementService {
         siteRepository.deleteById(siteEntity.getId());
         logger.info("Удаление существующего сайта: {}", siteEntity.getUrl());
     }
-
-    @Transactional
-    public void savePageData(Page indexingPage) {
-        pageRepository.save(indexingPage);
-    }
 }

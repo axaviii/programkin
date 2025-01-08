@@ -69,7 +69,7 @@ public class SiteMapRecursiveAction extends RecursiveAction {
         System.out.println(siteEntity.getId());
         siteEntityPage.setStatusTime(new Date());
         siteRepository.saveAndFlush(siteEntityPage);
-       siteManagementService.savePageData(indexingPage);
+        pageRepository.save(indexingPage);
         lemmaAndIndexService.processPageContent(indexingPage);
        // linksPool.add(url);
 
