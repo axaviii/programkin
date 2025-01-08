@@ -28,17 +28,18 @@ public class IndexingService {
     private AtomicBoolean stopRequested = new AtomicBoolean(false);
     private final ParseHtml parseHtml;
     private final LemmaAndIndexService lemmaAndIndexService;
-    private final SiteManagementService siteManagementService;
     private ForkJoinPool forkJoinPool;
 
-    public IndexingService(SiteRepository siteRepository, PageRepository pageRepository, SitesList sitesList, LemmaFinder lemmaFinder, ParseHtml parseHtml, LemmaAndIndexService lemmaAndIndexService, SiteManagementService siteManagementService) {
+    public IndexingService(SiteRepository siteRepository, PageRepository pageRepository, SitesList sitesList,
+                           LemmaFinder lemmaFinder, ParseHtml parseHtml,
+                           LemmaAndIndexService lemmaAndIndexService) {
         this.siteRepository = siteRepository;
         this.pageRepository = pageRepository;
         this.sitesList = sitesList;
         this.lemmaFinder = lemmaFinder;
         this.parseHtml = parseHtml;
         this.lemmaAndIndexService = lemmaAndIndexService;
-        this.siteManagementService = siteManagementService;
+
     }
 
     @Async
@@ -78,7 +79,7 @@ public class IndexingService {
                 SiteMap siteMap = new SiteMap(siteUrl.getUrl());
                 SiteMapRecursiveAction task = new SiteMapRecursiveAction(siteMap, siteEntity,
                         this, pageRepository, siteRepository, lemmaAndIndexService,
-                        stopRequested,siteManagementService);
+                        stopRequested);
                 logger.info("Запуск индексации для сайта: {}", siteUrl.getUrl());
                 forkJoinPool.invoke(task);
                 // task.join();
