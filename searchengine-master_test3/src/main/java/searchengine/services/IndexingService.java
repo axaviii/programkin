@@ -57,10 +57,10 @@ public class IndexingService {
                 logger.info("Начало индексации сайта: {}", siteUrl.getUrl());
 
                 SiteEntity existSiteEntity = siteRepository.findByUrl(siteUrl.getUrl());
-                if (existSiteEntity != null) {
-
-                    siteManagementService.deleteSiteData(existSiteEntity);
-                }
+                siteRepository.deleteAll();
+//                if (existSiteEntity != null) {
+//                    siteManagementService.deleteSiteData(existSiteEntity);
+//                }
                 //Создаем новую запись для сайта со статусом Indexing
                 SiteEntity siteEntity = new SiteEntity();
                 siteEntity.setUrl(siteUrl.getUrl());

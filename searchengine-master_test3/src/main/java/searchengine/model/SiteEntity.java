@@ -2,6 +2,8 @@ package searchengine.model;
 
 
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -31,10 +33,11 @@ public class SiteEntity {
     @Column(name= "name", columnDefinition = "VARCHAR(255)")
     private String name;
 
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @OneToMany(mappedBy = "siteEntity", orphanRemoval = true)
     private List<Lemma> lemmas = new ArrayList<>();
 
-
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @OneToMany(mappedBy = "siteEntity", orphanRemoval = true)
     private List<Page> pages = new ArrayList<>();
 }
