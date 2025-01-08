@@ -119,6 +119,10 @@ public class IndexingService {
 
     @Transactional
     public void stopIndexing() {
+
+        if(stopRequested.get()) {
+         return;
+        }
         stopRequested.set(true);
         if (forkJoinPool != null && !forkJoinPool.isShutdown()) {
             forkJoinPool.shutdown();
