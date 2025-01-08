@@ -66,7 +66,7 @@ public class SiteMapRecursiveAction extends RecursiveAction {
         siteRepository.saveAndFlush(siteEntityPage);
         pageRepository.save(indexingPage);
         lemmaAndIndexService.processPageContent(indexingPage);
-       // linksPool.add(url); 
+       // linksPool.add(url);
 
         ConcurrentSkipListSet<String> links = ParseHtml.getLinks(url);
         for (String link : links) {
@@ -77,7 +77,7 @@ public class SiteMapRecursiveAction extends RecursiveAction {
         //Рекурсивный обход дочерних страниц
         List<SiteMapRecursiveAction> taskList = new ArrayList<>();
         for (SiteMap child : siteMap.getSiteMapChildrens()) {
-            if (!stopRequested.get()) {
+            if (!stopRequested.get() && !linksPool.contains(child.getUrl())) {
                 SiteMapRecursiveAction task = new SiteMapRecursiveAction(child, siteEntity,
                         indexingService, pageRepository,
                         siteRepository, lemmaAndIndexService,
