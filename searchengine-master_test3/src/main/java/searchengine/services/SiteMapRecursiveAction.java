@@ -48,6 +48,9 @@ public class SiteMapRecursiveAction extends RecursiveAction {
             return;
         }
         String url = siteMap.getUrl();
+        if(pageRepository.existsByPath(url)){
+            return;
+        }
         linksPool.add(url);
 
         // получаем HTTP код и контент страницы
