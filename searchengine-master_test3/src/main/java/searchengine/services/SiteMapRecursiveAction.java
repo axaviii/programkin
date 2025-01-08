@@ -98,6 +98,11 @@ public class SiteMapRecursiveAction extends RecursiveAction {
         }
         updateSiteStatus();
     }
+
+    public static void clearLinksPool() {
+        linksPool.clear();
+    }
+
     private void updateSiteStatus() {
         siteEntity.setStatusTime(new Date());
         siteEntity.setStatus(Status.INDEXED); // Пример: установка статуса "INDEXED"

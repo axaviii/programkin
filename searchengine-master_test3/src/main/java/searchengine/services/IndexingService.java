@@ -94,6 +94,7 @@ public class IndexingService {
             if (forkJoinPool != null && !forkJoinPool.isShutdown()) {
                 forkJoinPool.shutdown();
             }
+            SiteMapRecursiveAction.clearLinksPool();
             logger.info("Индексация завершена. Программа готова к дальнейшим действиям.");
         }
     }
