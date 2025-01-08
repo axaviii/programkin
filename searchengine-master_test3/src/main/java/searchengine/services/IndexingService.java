@@ -48,6 +48,7 @@ public class IndexingService {
         forkJoinPool = new ForkJoinPool();
         stopRequested.set(false);
 
+        siteRepository.deleteAll();
         try {
             List<searchengine.config.Site> sites = sitesList.getSites();
             for (searchengine.config.Site siteUrl : sites) {
@@ -57,7 +58,7 @@ public class IndexingService {
                 logger.info("Начало индексации сайта: {}", siteUrl.getUrl());
 
                 SiteEntity existSiteEntity = siteRepository.findByUrl(siteUrl.getUrl());
-                siteRepository.deleteAll();
+
 //                if (existSiteEntity != null) {
 //                    siteManagementService.deleteSiteData(existSiteEntity);
 //                }
