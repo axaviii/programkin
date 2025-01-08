@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.config.SitesList;
+import searchengine.dto.statistics.SiteMap;
 import searchengine.model.*;
 import searchengine.repository.PageRepository;
 import searchengine.repository.SiteRepository;

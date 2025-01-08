@@ -2,6 +2,7 @@ package searchengine.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import searchengine.dto.statistics.SiteMap;
 import searchengine.model.Page;
 import searchengine.model.SiteEntity;
 import searchengine.model.Status;
