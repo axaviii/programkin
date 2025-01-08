@@ -25,10 +25,12 @@ public class SiteMapRecursiveAction extends RecursiveAction {
     private final static ConcurrentSkipListSet<String> linksPool = new ConcurrentSkipListSet<>();
     private static final Logger logger = LoggerFactory.getLogger(SiteMapRecursiveAction.class);
     private final AtomicBoolean stopRequested;
+    private final SiteManagementService siteManagementService;
 
     public SiteMapRecursiveAction(SiteMap siteMap, SiteEntity site, IndexingService indexingService,
                                   PageRepository pageRepository, SiteRepository siteRepository,
-                                  LemmaAndIndexService lemmaAndIndexService, AtomicBoolean stopRequested) {
+                                  LemmaAndIndexService lemmaAndIndexService, AtomicBoolean stopRequested,
+                                  SiteManagementService siteManagementService) {
         this.siteMap = siteMap;
         this.siteEntity = site;
         this.indexingService = indexingService;
@@ -36,6 +38,7 @@ public class SiteMapRecursiveAction extends RecursiveAction {
         this.siteRepository = siteRepository;
         this.lemmaAndIndexService = lemmaAndIndexService;
         this.stopRequested = stopRequested;
+        this.siteManagementService = siteManagementService;
     }
 
     @Override
@@ -54,17 +57,12 @@ public class SiteMapRecursiveAction extends RecursiveAction {
 //                    if (content == null || content.isBlank()) {
 //                        throw new IllegalStateException("Содержимое страницы пустое: " + link);
 //                    }
-        Page indexingPage = new Page();
-        indexingPage.setSiteEntity(siteEntity);
-        indexingPage.setPath(url);
-        indexingPage.setCode(code);
-        indexingPage.setContent(content);
 
         SiteEntity siteEntityPage = siteRepository.findById(siteEntity.getId()).orElseThrow();
         System.out.println(siteEntity.getId());
         siteEntityPage.setStatusTime(new Date());
         siteRepository.saveAndFlush(siteEntityPage);
-        pageRepository.save(indexingPage);
+       siteManagementService.savePageData(siteEntity,url, code,content);
         lemmaAndIndexService.processPageContent(indexingPage);
        // linksPool.add(url);
 
@@ -81,7 +79,7 @@ public class SiteMapRecursiveAction extends RecursiveAction {
                 SiteMapRecursiveAction task = new SiteMapRecursiveAction(child, siteEntity,
                         indexingService, pageRepository,
                         siteRepository, lemmaAndIndexService,
-                        stopRequested);
+                        stopRequested, siteManagementService);
                 task.fork();
                 taskList.add(task);
             }

@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import searchengine.model.Page;
 import searchengine.model.SiteEntity;
 import searchengine.repository.IndexRepository;
 import searchengine.repository.PageRepository;
@@ -28,6 +29,16 @@ public class SiteManagementService {
         pageRepository.deleteBySiteEntity(siteEntity);
         siteRepository.deleteById(siteEntity.getId());
         logger.info("Удаление существующего сайта: {}", siteEntity.getUrl());
+    }
+
+    @Transactional
+    public void savePageData(SiteEntity siteEntity, String url, Integer code, String content) {
+        Page indexingPage = new Page();
+        indexingPage.setSiteEntity(siteEntity);
+        indexingPage.setPath(url);
+        indexingPage.setCode(code);
+        indexingPage.setContent(content);
+        pageRepository.save(indexingPage);
     }
 
 }
