@@ -86,7 +86,7 @@ public class SiteMapRecursiveAction extends RecursiveAction {
                 task.fork();
                 taskList.add(task);
             }
-            updateSiteStatus();
+           // updateSiteStatus();
         }
         // Ожидаем завершения всех задач
         for (SiteMapRecursiveAction task : taskList) {
