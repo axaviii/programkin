@@ -46,6 +46,9 @@ public class PageIndexingService {
             throw new IllegalAccessException("Данная страница находится за пределами сайтов");
         }
         try {
+            if(url.endsWith("/")){
+            url =  url.substring(0, url.length()-1);
+            }
             //находим сайт к которому относится Url
             SiteEntity siteEntity = siteRepository.findByUrl(getSiteBaseUrl(url));
             if (siteEntity == null) {
