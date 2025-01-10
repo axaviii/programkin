@@ -11,6 +11,7 @@ import searchengine.model.Page;
 import searchengine.repository.IndexRepository;
 import searchengine.repository.LemmaRepository;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -48,7 +49,7 @@ public class LemmaAndIndexService {
 
     @Transactional
     public void saveLemma(String lemmaText, Integer frequency, Page page) {
-        Optional<Lemma> lemmaOptional = lemmaRepository.findByLemmaAndSiteEntityId(lemmaText, page.getSiteEntity().getId());
+        List<Lemma> lemmaOptional = lemmaRepository.findByLemmaAndSiteEntityId(lemmaText, page.getSiteEntity().getId());
         if (lemmaOptional.isEmpty()) {
             Lemma newlemma = new Lemma();
             newlemma.setLemma(lemmaText);
@@ -56,7 +57,7 @@ public class LemmaAndIndexService {
             newlemma.setSiteEntity(page.getSiteEntity());
             lemmaRepository.saveAndFlush(newlemma);
         } else {
-            Lemma lemma = lemmaOptional.get();
+            Lemma lemma = lemmaOptional.get(0);
             //увеличиваем частоту и обновляем лемму
             lemma.setFrequency(lemma.getFrequency() + frequency);
             lemmaRepository.saveAndFlush(lemma);
@@ -84,8 +85,8 @@ public class LemmaAndIndexService {
 
     // Получаем частоту леммы по тексту и id сайта
     public  int getLemmaFrequency(String lemmaText, int siteEntityId) {
-        Optional<Lemma> lemma = lemmaRepository.findByLemmaAndSiteEntityId(lemmaText, siteEntityId);
-        return lemma.map(Lemma::getFrequency).orElse(0);
+        List<Lemma> lemma = lemmaRepository.findByLemmaAndSiteEntityId(lemmaText, siteEntityId);
+        return Optional.of(lemma.get(0).getFrequency()).orElse(0);
     }
 
     // получаем ранг леммы для заданной страницы

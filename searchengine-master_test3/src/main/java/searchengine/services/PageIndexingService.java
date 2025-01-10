@@ -115,7 +115,7 @@ public class PageIndexingService {
 
     private void saveLemmasAndIndexes(String lemmaText, Integer frequency, Page page) {
             // Ищем существующую лемму или создаем новую
-            Optional<Lemma> lemmaOptional = lemmaRepository.findByLemmaAndSiteEntityId(lemmaText, page.getSiteEntity().getId());
+            List<Lemma> lemmaOptional = lemmaRepository.findByLemmaAndSiteEntityId(lemmaText, page.getSiteEntity().getId());
             if (lemmaOptional.isEmpty()) {
                 Lemma newLemma = new Lemma();
                 newLemma.setLemma(lemmaText);
@@ -124,7 +124,7 @@ public class PageIndexingService {
                 lemmaRepository.saveAndFlush(newLemma);
                 ;
             } else {
-                Lemma lemma = lemmaOptional.get();
+                Lemma lemma = lemmaOptional.get(0);
                 //увеличиваем частоту использования леммы
                 lemma.setFrequency(lemma.getFrequency() + frequency);
                 lemmaRepository.saveAndFlush(lemma);

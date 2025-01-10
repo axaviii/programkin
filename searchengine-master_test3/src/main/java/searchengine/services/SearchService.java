@@ -118,11 +118,11 @@ public class SearchService {
 
         for (int i = 1; i < lemmas.size(); i++) {
             String lemma = lemmas.get(i);
-            Optional<Lemma> lemmaEntity = lemmaRepository.findByLemmaAndSiteEntityId(lemma, siteEntityId);
+            List<Lemma> lemmaEntity = lemmaRepository.findByLemmaAndSiteEntityId(lemma, siteEntityId);
             if (lemmaEntity.isEmpty()) {
                 return Collections.emptyList();
             }
-            int lemmaId = lemmaEntity.get().getId();
+            int lemmaId = lemmaEntity.get(0).getId();
 
             List<Index> currentIndexes = indexRepository.findPagesByLemmaId(lemmaId);
                     matchingIndexes.retainAll(currentIndexes);// остаются только пересечения
@@ -142,10 +142,10 @@ public class SearchService {
         for (Page page : pages) {
             double relevance = 0.0;
             for (String lemma : lemmas) {
-                Optional<Lemma> lemmaEntity = lemmaRepository
+                List<Lemma> lemmaEntity = lemmaRepository
                         .findByLemmaAndSiteEntityId(lemma, siteEntityId);
-                if (lemmaEntity.isPresent()) {
-                    int lemmaId = lemmaEntity.get().getId();
+                if (!lemmaEntity.isEmpty()) {
+                    int lemmaId = lemmaEntity.get(0).getId();
                     relevance += lemmasAndIndexService.getLemmaRank(page.getId(), lemmaId);
                 }
             }
