@@ -86,6 +86,9 @@ public class LemmaAndIndexService {
     // Получаем частоту леммы по тексту и id сайта
     public  int getLemmaFrequency(String lemmaText, int siteEntityId) {
         List<Lemma> lemma = lemmaRepository.findByLemmaAndSiteEntityId(lemmaText, siteEntityId);
+            if (lemma.isEmpty()) {
+                return 0;
+            }
         return Optional.of(lemma.get(0).getFrequency()).orElse(0);
     }
 
