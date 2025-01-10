@@ -64,7 +64,7 @@ public class PageIndexingService {
 
             Page existingPage = pageRepository.findByPathAndSiteEntity(url, siteEntity).orElse(null);
             if (existingPage != null) {
-                deleteExistingPageData(existingPage);
+                pageRepository.delete(existingPage);
                 logger.info("Старая запись для страницы {} удалена", url);
             }
             // Получаем данные страницы
@@ -95,25 +95,6 @@ public class PageIndexingService {
             logger.error("Ошибка при индексации страницы {}: {}", url, e.getMessage());
             throw new RuntimeException("Индексация не удалась: " + e.getMessage());
         }
-    }
-
-    private void deleteExistingPageData(Page page) {
-        // удаляем записи из таблицы index
-        List<Index> indexes = indexRepository.findByPage(page);
-        for (Index index : indexes) {
-            Lemma lemma = index.getLemma();
-            //удаляем запись из index
-            indexRepository.delete(index);
-            //уменьшаем частоту леммы
-            lemma.setFrequency(lemma.getFrequency() - 1);
-            if (lemma.getFrequency() <= 0) {
-                lemmaRepository.delete(lemma);
-            } else {
-                lemmaRepository.save(lemma);
-            }
-
-        }
-        pageRepository.delete(page);
     }
 
     private void saveLemmasAndIndexes(String lemmaText, Integer frequency, Page page) {
